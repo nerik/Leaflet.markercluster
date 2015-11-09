@@ -405,7 +405,7 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 	//Overrides LayerGroup.getLayer, WARNING: Really bad performance
 	getLayer: function (id) {
 		var result = null;
-		
+
 		id = parseInt(id, 10);
 
 		this.eachLayer(function (l) {
@@ -443,7 +443,7 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 
 	//Zoom down to show the given layer (spiderfying if necessary) then calls the callback
 	zoomToShowLayer: function (layer, callback) {
-		
+
 		if (typeof callback !== 'function') {
 			callback = function () {};
 		}
@@ -793,7 +793,7 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 		var maxZoom = this._map.getMaxZoom(),
 			radius = this.options.maxClusterRadius,
 			radiusFn = radius;
-	
+
 		//If we just set maxClusterRadius to a single number, we need to create
 		//a simple function to return that number. Otherwise, we just have to
 		//use the function we've passed in.
@@ -807,15 +807,20 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 		this._maxZoom = maxZoom;
 		this._gridClusters = {};
 		this._gridUnclustered = {};
-	
+
 		//Set up DistanceGrids for each zoom
 		for (var zoom = maxZoom; zoom >= 0; zoom--) {
-			this._gridClusters[zoom] = new L.DistanceGrid(radiusFn(zoom));
-			this._gridUnclustered[zoom] = new L.DistanceGrid(radiusFn(zoom));
+			this._initializeGrid(this._gridClusters, zoom, radiusFn);
+			this._initializeGrid(this._gridUnclustered, zoom, radiusFn);
 		}
 
 		// Instantiate the appropriate L.MarkerCluster class (animated or not).
 		this._topClusterLevel = new this._markerCluster(this, -1);
+	},
+
+	_initializeGrid: function (targetGrid, zoom, radiusFn) {
+		targetGrid[zoom] = new L.DistanceGrid(radiusFn(zoom));
+		targetGrid[zoom] = new L.DistanceGrid(radiusFn(zoom));
 	},
 
 	//Zoom: Zoom to start adding at (Pass this._maxZoom to start at the bottom)

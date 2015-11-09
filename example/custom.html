@@ -17,10 +17,14 @@
 	<script src="../src/MarkerCluster.QuickHull.js"></script>
 	<script src="../src/MarkerCluster.Spiderfier.js"></script>
 	<script src="../src/MarkerClusterGroup.Refresh.js"></script>
+
+	<script src="../src/MarkerClusterGroup.Custom.js"></script>
 </head>
 <body>
 
 	<div id="map"></div>
+
+	<button onclick="test()" >test</button>
 
 	<script type="text/javascript">
 
@@ -42,9 +46,17 @@
 		});
 
 		var map = L.map('map')
-				.addLayer(tiles);
+				.addLayer(tiles)
 
-		var markers = L.markerClusterGroup();
+		map.setView([-37.8210922667,175.2209316333], 14);
+
+		var testValue = true;
+		var markers = L.markerClusterGroupCustom({
+			iconCreateFunction: function(cluster) {
+        		return L.divIcon({ html: '<b>' + testValue + '/' + cluster.getChildCount() + '</b>' });
+			}
+	    });
+
 
 		var geoJsonLayer = L.geoJson(geoJsonData, {
 			onEachFeature: function (feature, layer) {
@@ -54,7 +66,12 @@
 		markers.addLayer(geoJsonLayer);
 
 		map.addLayer(markers);
-		map.fitBounds(markers.getBounds());
+		// map.fitBounds(markers.getBounds());
+
+		function test() {
+			testValue = !testValue;
+			markers.refreshClusters();
+		}
 	</script>
 </body>
 </html>
