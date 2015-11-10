@@ -820,11 +820,12 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 
 	_initializeGrid: function (targetGrid, zoom, radiusFn) {
 		targetGrid[zoom] = new L.DistanceGrid(radiusFn(zoom));
-		targetGrid[zoom] = new L.DistanceGrid(radiusFn(zoom));
 	},
 
 	//Zoom: Zoom to start adding at (Pass this._maxZoom to start at the bottom)
 	_addLayer: function (layer, zoom) {
+		console.log('------------------------------')
+		console.log('add layer at zoom ' + zoom)
 		var gridClusters = this._gridClusters,
 		    gridUnclustered = this._gridUnclustered,
 		    markerPoint, z;
@@ -835,19 +836,22 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 
 		//Find the lowest zoom level to slot this one in
 		for (; zoom >= 0; zoom--) {
+			console.log(zoom)
 			markerPoint = this._map.project(layer.getLatLng(), zoom); // calculate pixel position
 
 			//Try find a cluster close by
-			var closest = gridClusters[zoom].getNearObject(markerPoint);
+			var closest = gridClusters[zoom].getNearObject(markerPoint, layer);
 			if (closest) {
+				console.log('cluster already exist')
 				closest._addChild(layer);
 				layer.__parent = closest;
 				return;
 			}
 
 			//Try find a marker close by to form a new cluster with
-			closest = gridUnclustered[zoom].getNearObject(markerPoint);
+			closest = gridUnclustered[zoom].getNearObject(markerPoint, layer);
 			if (closest) {
+				console.log('form a new cluster')
 				var parent = closest.__parent;
 				if (parent) {
 					this._removeLayer(closest, false);
@@ -862,7 +866,9 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 
 				//First create any new intermediate parent clusters that don't exist
 				var lastParent = newCluster;
+				console.log('create intermediate clusters')
 				for (z = zoom - 1; z > parent._zoom; z--) {
+					console.log(z)
 					lastParent = new this._markerCluster(this, z, lastParent);
 					gridClusters[z].addObject(lastParent, this._map.project(closest.getLatLng(), z));
 				}
@@ -877,6 +883,8 @@ L.MarkerClusterGroup = L.FeatureGroup.extend({
 			//Didn't manage to cluster in at this zoom, record us as a marker here and continue upwards
 			gridUnclustered[zoom].addObject(layer, markerPoint);
 		}
+
+		console.log('add cluster to top level')
 
 		//Didn't get in anything, add us to the top
 		this._topClusterLevel._addChild(layer);

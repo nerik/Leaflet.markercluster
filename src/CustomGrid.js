@@ -1,12 +1,14 @@
 
-L.DistanceGrid = function (cellSize) {
+L.CustomGrid = function (cellSize /*, zoom*/) {
 	this._cellSize = cellSize;
 	this._sqCellSize = cellSize * cellSize;
 	this._grid = {};
 	this._objectPoint = { };
+	this._allObjs = [];
+	// this._zoom = zoom;
 };
 
-L.DistanceGrid.prototype = {
+L.CustomGrid.prototype = {
 
 	addObject: function (obj, point) {
 		var x = this._getCoord(point.x),
@@ -17,6 +19,8 @@ L.DistanceGrid.prototype = {
 		    stamp = L.Util.stamp(obj);
 
 		this._objectPoint[stamp] = point;
+
+		this._allObjs.push(obj)
 
 		cell.push(obj);
 	},
@@ -73,13 +77,58 @@ L.DistanceGrid.prototype = {
 		}
 	},
 
-	getNearObject: function (point) {
+	getNearObject: function (point, layer) {
+
+		// if (this._zoom === 15) {
+		console.log(this._zoom)
+			var res;
+			this._allObjs.forEach(function (obj) {
+				// console.log(obj)
+				if (obj.feature) {
+					console.log(obj.feature.properties.test, layer.feature.properties.test)
+				}
+				if (obj.feature && obj.feature.properties.test === layer.feature.properties.test) {
+					res = obj;
+				}
+			})
+
+			console.log(res)
+
+			return res;
+		// }
+
+
+
 		var x = this._getCoord(point.x),
 		    y = this._getCoord(point.y),
 		    i, j, k, row, cell, len, obj, dist,
 		    objectPoint = this._objectPoint,
 		    closestDistSq = this._sqCellSize,
 		    closest = null;
+		// console.log(this._grid)
+		for (i = y - 1; i <= y + 1; i++) {
+			row = this._grid[i];
+			if (row) {
+
+				for (j = x - 1; j <= x + 1; j++) {
+					cell = row[j];
+					if (cell) {
+
+						for (k = 0, len = cell.length; k < len; k++) {
+							// obj = cell[k];
+							if (cell[k].feature) {
+								// console.log(cell[k].feature.properties.test)
+								// console.log(layer.feature.properties.test)
+								// if (cell[k].feature.properties.test === layer.feature.properties.test) {
+								// 	return cell[k];
+								// }
+							}
+						}
+					}
+				}
+			}
+		}
+
 
 		for (i = y - 1; i <= y + 1; i++) {
 			row = this._grid[i];

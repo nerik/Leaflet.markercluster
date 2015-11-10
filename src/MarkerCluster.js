@@ -1,6 +1,6 @@
 L.MarkerCluster = L.Marker.extend({
 	initialize: function (group, zoom, a, b) {
-
+		console.log('new MarkerGroup ' + zoom)
 		L.Marker.prototype.initialize.call(this, a ? (a._cLatLng || a.getLatLng()) : new L.LatLng(0, 0), { icon: this });
 
 
